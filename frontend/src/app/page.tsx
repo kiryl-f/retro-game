@@ -2,13 +2,17 @@
 
 import React from 'react';
 import Game from './game/game';
+import MenuButton from './components/menu_button';
+import StartMenu from './components/start_menu';
+import { NextPage } from 'next';
 
-const HomePage = () => {
+const HomePage: NextPage = () => {
   return (
-    <div>
-      <h1>Retro Game</h1>
-      <Game />
-    </div>
+    <>
+     <StartMenu/>
+     {/* <Game /> */}
+    </>
+    
   );
 };
 

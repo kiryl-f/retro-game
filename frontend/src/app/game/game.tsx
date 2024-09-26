@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Player from '../components/player';
 import Enemy from '../components/enemy';
 import styled from 'styled-components';
+import { NextPage } from 'next';
 
 const GameContainer = styled.div`
   width: 100%;
@@ -13,7 +14,7 @@ const GameContainer = styled.div`
   overflow: hidden;
 `;
 
-const Game: React.FC = () => {
+const Game: NextPage = () => {
   const [playerPosition, setPlayerPosition] = useState(0);
 
   const updatePlayerPosition = (newPosition: number) => {
