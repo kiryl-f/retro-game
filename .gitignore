@@ -1,0 +1,21 @@
+# Node.js dependencies
+node_modules/
+dist/
+.next/
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+
+# OS/IDE-specific
+.DS_Store
+.vscode/
+.idea/
+
+# TypeScript build output
+*.js
+*.map
