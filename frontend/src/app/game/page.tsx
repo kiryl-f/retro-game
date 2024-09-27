@@ -15,13 +15,20 @@ const enemySpeed = 2; // Speed for enemy movement
 const bulletSpeed = 8; // Speed of bullets
 
 // Styled Components
-const GameContainer = styled.div`
+const GameContainer = styled.div.attrs<{ x: number; y: number }>((props) => ({
+    style: {
+        bottom: `${props.y}px`,
+        left: `${props.x}px`,
+    },
+}))`
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: ${colors.background};
     overflow: hidden;
+    background: linear-gradient(to bottom, #3a3a3a, #8a8a8a); // Change colors as desired
+    background-size: cover; // Ensure it covers the entire container
+    background-repeat: no-repeat;
     position: relative;
 `;
 
@@ -37,6 +44,7 @@ const Player = styled.div.attrs<{ x: number; y: number }>((props) => ({
     background-image: url("/images/player.png"); // Directly reference the image
     background-size: cover;
     background-repeat: no-repeat;
+    z-index: 2; // Player should be in front of enemies
 `;
 
 const Enemy = styled.div.attrs<{ x: number; y: number }>((props) => ({
@@ -51,6 +59,24 @@ const Enemy = styled.div.attrs<{ x: number; y: number }>((props) => ({
     background-image: url("/images/enemy.png");
     background-size: cover; // Ensure the image covers the entire div
     background-repeat: no-repeat;
+    z-index: 1; // Enemies should be behind the player
+`;
+
+const Bullet = styled.div.attrs<{ x: number; y: number }>((props) => ({
+    style: {
+        top: `${props.y}px`,
+        left: `${props.x}px`,
+    },
+}))`
+    position: absolute;
+    width: 50px;  // Adjust size according to your bullet image
+    height: 50px;
+    background-image: url("/images/bullet.png"); // Use bullet image
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: 3; // Bullets should be in front of the player and enemies
+
+    transform: rotate(90deg);
 `;
 
 const Platform = styled.div`
@@ -60,15 +86,7 @@ const Platform = styled.div`
     width: 100%;
     height: ${groundHeight}px;
     background-color: ${colors.secondaryButton};
-`;
-
-const Bullet = styled.div<{ x: number; y: number }>`
-    position: absolute;
-    top: ${(props) => props.y}px;
-    left: ${(props) => props.x}px;
-    width: 10px;
-    height: 10px;
-    background-color: yellow;
+    z-index: 0; // Platform should be the lowest
 `;
 
 // Game Component
@@ -83,13 +101,21 @@ const GamePage: React.FC = () => {
     // Player Movement
     const handleKeyDown = (e: KeyboardEvent) => {
         if (!playerAlive) return; // Prevent movement if the player is dead
-
+    
         switch (e.code) {
             case "ArrowLeft":
-                setPlayerPosition((prev) => ({ ...prev, x: prev.x - moveSpeed }));
+                setPlayerPosition((prev) => {
+                    const newX = prev.x - moveSpeed;
+                    console.log('playerX: ' + newX);
+                    return { ...prev, x: newX };
+                });
                 break;
             case "ArrowRight":
-                setPlayerPosition((prev) => ({ ...prev, x: prev.x + moveSpeed }));
+                setPlayerPosition((prev) => {
+                    const newX = prev.x + moveSpeed;
+                    console.log('playerX: ' + newX);
+                    return { ...prev, x: newX };
+                });
                 break;
             case "Space":
                 if (onGround) {
@@ -102,6 +128,7 @@ const GamePage: React.FC = () => {
                 break;
         }
     };
+    
 
     // Jumping and Gravity Logic
     useEffect(() => {
@@ -109,7 +136,7 @@ const GamePage: React.FC = () => {
             setPlayerPosition((prev) => {
                 let newY = prev.y + velocityY;
                 let newVelocityY = velocityY + gravity;
-
+                
                 // Ground collision
                 if (newY <= groundHeight) {
                     newY = groundHeight;
@@ -134,6 +161,8 @@ const GamePage: React.FC = () => {
                     if (newX < -40) { // Off-screen, respawn enemy
                         newX = window.innerWidth;
                     }
+
+                    //console.log('enemyX: ' + newX);
                     return { x: newX, y: groundHeight };
                 })
             );
@@ -151,7 +180,9 @@ const GamePage: React.FC = () => {
                     .filter((bullet) => bullet.x < window.innerWidth) // Remove off-screen bullets
             );
         }, 20);
-
+        if(bullets.length > 0) {
+            console.log('bulletsX' + bullets[0].x);
+        }
         return () => clearInterval(interval);
     }, [bullets]);
 
@@ -196,7 +227,7 @@ const GamePage: React.FC = () => {
     const shootBullet = () => {
         setBullets((prevBullets) => [
             ...prevBullets,
-            { x: playerPosition.x + 50, y: window.innerHeight - playerPosition.y - 30 }, // Align bullet with player
+            { x: playerPosition.x + 50, y: window.innerHeight - playerPosition.y - 65 }, // Align bullet with player
         ]);
     };
 
@@ -207,7 +238,7 @@ const GamePage: React.FC = () => {
     }, [onGround, playerAlive]);
 
     return (
-        <GameContainer>
+        <GameContainer x={0} y={0}>
             {playerAlive ? (
                 <>
                     <Player x={playerPosition.x} y={playerPosition.y} />
