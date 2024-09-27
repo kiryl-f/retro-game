@@ -4,14 +4,17 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { colors } from "../color";
 
-// Constants for game mechanics
+
+
+// Constants
 const gravity = 0.5;
 const jumpHeight = -12;
 const moveSpeed = 5;
 const groundHeight = 20; // Platform height
 const enemySpeed = 2; // Speed for enemy movement
-const bulletSpeed = 10; // Speed for bullet movement
+const bulletSpeed = 8; // Speed of bullets
 
+// Styled Components
 const GameContainer = styled.div`
     display: flex;
     justify-content: center;
@@ -22,22 +25,32 @@ const GameContainer = styled.div`
     position: relative;
 `;
 
-const Player = styled.div<{ x: number; y: number }>`
+const Player = styled.div.attrs<{ x: number; y: number }>((props) => ({
+    style: {
+        bottom: `${props.y}px`,
+        left: `${props.x}px`,
+    },
+}))`
     position: absolute;
-    bottom: ${(props) => props.y}px;
-    left: ${(props) => props.x}px;
-    width: 50px;
-    height: 50px;
-    background-color: ${colors.text};
+    width: 100px;
+    height: 100px;
+    background-image: url("/images/player.png"); // Directly reference the image
+    background-size: cover;
+    background-repeat: no-repeat;
 `;
 
-const Enemy = styled.div<{ x: number; y: number }>`
+const Enemy = styled.div.attrs<{ x: number; y: number }>((props) => ({
+    style: {
+        bottom: `${props.y}px`,
+        left: `${props.x}px`,
+    },
+}))`
     position: absolute;
-    bottom: ${(props) => props.y}px;
-    left: ${(props) => props.x}px;
-    width: 40px;
-    height: 40px;
-    background-color: #FF0000;
+    width: 90px;
+    height: 90px;
+    background-image: url("/images/enemy.png");
+    background-size: cover; // Ensure the image covers the entire div
+    background-repeat: no-repeat;
 `;
 
 const Platform = styled.div`
@@ -55,152 +68,160 @@ const Bullet = styled.div<{ x: number; y: number }>`
     left: ${(props) => props.x}px;
     width: 10px;
     height: 10px;
-    background-color: ${colors.primaryButton};
+    background-color: yellow;
 `;
 
+// Game Component
 const GamePage: React.FC = () => {
     const [playerPosition, setPlayerPosition] = useState({ x: 100, y: groundHeight });
     const [velocityY, setVelocityY] = useState(0);
-    const [onGround, setOnGround] = useState(true); // Set to true initially to be on the ground
-    const [enemyPosition, setEnemyPosition] = useState({ x: 500, y: groundHeight });
-    const [playerAlive, setPlayerAlive] = useState(true); // Check if the player is alive
+    const [onGround, setOnGround] = useState(true); // Player initially on the ground
     const [bullets, setBullets] = useState<{ x: number; y: number }[]>([]);
+    const [enemies, setEnemies] = useState([{ x: 500, y: groundHeight }]); // Initial enemy position
+    const [playerAlive, setPlayerAlive] = useState(true);
 
-    // Handle player movement (left, right, jump)
+    // Player Movement
     const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.code === "ArrowLeft") {
-            setPlayerPosition((prev) => ({ ...prev, x: prev.x - moveSpeed }));
-        }
-        if (e.code === "ArrowRight") {
-            setPlayerPosition((prev) => ({ ...prev, x: prev.x + moveSpeed }));
-        }
-        if (e.code === "Space" && onGround) {
-            setVelocityY(jumpHeight); // Jump
-            setOnGround(false);
+        if (!playerAlive) return; // Prevent movement if the player is dead
+
+        switch (e.code) {
+            case "ArrowLeft":
+                setPlayerPosition((prev) => ({ ...prev, x: prev.x - moveSpeed }));
+                break;
+            case "ArrowRight":
+                setPlayerPosition((prev) => ({ ...prev, x: prev.x + moveSpeed }));
+                break;
+            case "Space":
+                if (onGround) {
+                    setVelocityY(jumpHeight);
+                    setOnGround(false);
+                }
+                break;
+            case "KeyS":
+                shootBullet();
+                break;
         }
     };
 
-    // Handle gravity and jumping
+    // Jumping and Gravity Logic
     useEffect(() => {
         const interval = setInterval(() => {
             setPlayerPosition((prev) => {
                 let newY = prev.y + velocityY;
                 let newVelocityY = velocityY + gravity;
 
-                if (newY <= groundHeight) { // Player lands on the ground
+                // Ground collision
+                if (newY <= groundHeight) {
                     newY = groundHeight;
                     newVelocityY = 0;
                     setOnGround(true);
-                } else {
-                    setOnGround(false);
                 }
 
                 setVelocityY(newVelocityY);
                 return { ...prev, y: newY };
             });
-        }, 20); // Update interval for physics
+        }, 20); // Physics interval
 
         return () => clearInterval(interval);
     }, [velocityY]);
 
-    // Enemy movement logic
-    useEffect(() => {
-        const enemyInterval = setInterval(() => {
-            setEnemyPosition((prev) => {
-                let newX = prev.x - enemySpeed;
-                if (newX < -50) { // When the enemy leaves the screen, reset position
-                    newX = 800; // Restart the enemy from the right side
-                }
-                return { ...prev, x: newX };
-            });
-        }, 20); // Update interval for enemy movement
-
-        return () => clearInterval(enemyInterval);
-    }, []);
-
-    // Collision detection (bounding box)
-    useEffect(() => {
-        const checkCollision = () => {
-            const playerRight = playerPosition.x + 50;
-            const playerLeft = playerPosition.x;
-            const playerTop = window.innerHeight - playerPosition.y - 50;
-            const playerBottom = window.innerHeight - playerPosition.y;
-
-            const enemyRight = enemyPosition.x + 40;
-            const enemyLeft = enemyPosition.x;
-            const enemyTop = window.innerHeight - enemyPosition.y - 40;
-            const enemyBottom = window.innerHeight - enemyPosition.y;
-
-            if (
-                playerRight > enemyLeft &&
-                playerLeft < enemyRight &&
-                playerBottom > enemyTop &&
-                playerTop < enemyBottom
-            ) {
-                console.log("Collision detected!");
-                setPlayerAlive(false); // Player "dies" on collision
-            }
-        };
-
-        const collisionInterval = setInterval(checkCollision, 20);
-        return () => clearInterval(collisionInterval);
-    }, [playerPosition, enemyPosition]);
-
-    // Listen for keyboard input
-    useEffect(() => {
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [onGround]);
-
-    // Shooting logic
-    const shootBullet = () => {
-        setBullets((prev) => [
-            ...prev,
-            { x: playerPosition.x + 35, y: window.innerHeight - playerPosition.y - 30 }, // Center bullet from player
-        ]);
-    };
-
-    useEffect(() => {
-        const handleShootKey = (e: KeyboardEvent) => {
-            if (e.code === "KeyS") {
-                shootBullet();
-            }
-        };
-
-        window.addEventListener("keydown", handleShootKey);
-        return () => window.removeEventListener("keydown", handleShootKey);
-    }, [playerPosition]);
-
-    // Update bullet positions and handle enemy collisions
+    // Enemy Movement
     useEffect(() => {
         const interval = setInterval(() => {
-            setBullets((prev) =>
-                prev
-                    .map((bullet) => ({
-                        ...bullet,
-                        x: bullet.x + bulletSpeed, // Move bullet to the right
-                    }))
-                    .filter((bullet) => bullet.x < window.innerWidth) // Remove bullets off-screen
+            setEnemies((prevEnemies) =>
+                prevEnemies.map((enemy) => {
+                    let newX = enemy.x - enemySpeed;
+                    if (newX < -40) { // Off-screen, respawn enemy
+                        newX = window.innerWidth;
+                    }
+                    return { x: newX, y: groundHeight };
+                })
+            );
+        }, 20); // Enemy movement interval
+
+        return () => clearInterval(interval);
+    }, []);
+
+    // Bullet Movement and Collision
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setBullets((prevBullets) =>
+                prevBullets
+                    .map((bullet) => ({ ...bullet, x: bullet.x + bulletSpeed })) // Move bullets
+                    .filter((bullet) => bullet.x < window.innerWidth) // Remove off-screen bullets
             );
         }, 20);
 
         return () => clearInterval(interval);
     }, [bullets]);
 
+    // Bullet-Enemy Collision Detection
+    useEffect(() => {
+        const checkBulletCollision = () => {
+            setEnemies((prevEnemies) =>
+                prevEnemies.filter((enemy) => {
+                    const hit = bullets.some(
+                        (bullet) =>
+                            bullet.x + 10 > enemy.x && bullet.x < enemy.x + 40 && bullet.y === window.innerHeight - enemy.y - 20
+                    );
+                    return !hit; // Remove enemy if hit
+                })
+            );
+        };
+
+        const interval = setInterval(checkBulletCollision, 20);
+        return () => clearInterval(interval);
+    }, [bullets, enemies]);
+
+    // Player-Enemy Collision Detection
+    useEffect(() => {
+        const checkPlayerCollision = () => {
+            enemies.forEach((enemy) => {
+                if (
+                    playerPosition.x + 50 > enemy.x &&
+                    playerPosition.x < enemy.x + 40 &&
+                    playerPosition.y === enemy.y
+                ) {
+                    console.log("Player hit!");
+                    setPlayerAlive(false); // End game on collision
+                }
+            });
+        };
+
+        const interval = setInterval(checkPlayerCollision, 20);
+        return () => clearInterval(interval);
+    }, [playerPosition, enemies]);
+
+    // Bullet shooting logic
+    const shootBullet = () => {
+        setBullets((prevBullets) => [
+            ...prevBullets,
+            { x: playerPosition.x + 50, y: window.innerHeight - playerPosition.y - 30 }, // Align bullet with player
+        ]);
+    };
+
+    // Listen for keyboard input
+    useEffect(() => {
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [onGround, playerAlive]);
+
     return (
         <GameContainer>
             {playerAlive ? (
                 <>
                     <Player x={playerPosition.x} y={playerPosition.y} />
-                    <Enemy x={enemyPosition.x} y={enemyPosition.y} />
+                    <Platform />
+                    {bullets.map((bullet, index) => (
+                        <Bullet key={index} x={bullet.x} y={bullet.y} />
+                    ))}
+                    {enemies.map((enemy, index) => (
+                        <Enemy key={index} x={enemy.x} y={enemy.y} />
+                    ))}
                 </>
             ) : (
                 <h1 style={{ color: "red" }}>Game Over</h1>
             )}
-            <Platform />
-            {bullets.map((bullet, index) => (
-                <Bullet key={index} x={bullet.x} y={bullet.y} />
-            ))}
         </GameContainer>
     );
 };
