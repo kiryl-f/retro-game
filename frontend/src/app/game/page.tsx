@@ -171,7 +171,7 @@ const GamePage: React.FC = () => {
         const interval = setInterval(() => {
             setBullets((prevBullets) =>
                 prevBullets
-                    .map((bullet) => ({ ...bullet, x: bullet.x + bulletSpeed })) // Move bullets right
+                    .map((bullet) => ({ ...bullet, x: bullet.x + bulletSpeed })) // Move bullets
                     .filter((bullet) => bullet.x < window.innerWidth) // Remove off-screen bullets
             );
         }, 20);
@@ -179,19 +179,32 @@ const GamePage: React.FC = () => {
         return () => clearInterval(interval);
     }, [bullets]);
     
+    
     // Bullet-Enemy Collision Detection
     useEffect(() => {
         const checkBulletCollision = () => {
             setEnemies((prevEnemies) =>
                 prevEnemies.filter((enemy) => {
-                    const hit = bullets.some(
-                        (bullet) =>
-                            bullet.x + 10 > enemy.x && bullet.x < enemy.x + 40 && bullet.y === window.innerHeight - enemy.y - 20
-                    );
+                    const hit = bullets.some((bullet) => {
+                        const bulletRightEdge = bullet.x + 50; // Assuming bullet width is 50
+                        const bulletBottomEdge = bullet.y + 50; // Assuming bullet height is 50
+        
+                        const enemyRightEdge = enemy.x + 90; // Assuming enemy width is 90
+                        const enemyBottomEdge = enemy.y + 90; // Assuming enemy height is 90
+        
+                        // Check for collision
+                        return (
+                            bulletRightEdge > enemy.x && // Bullet's right edge is past the enemy's left edge
+                            bullet.x < enemyRightEdge && // Bullet's left edge is before the enemy's right edge
+                            bulletBottomEdge > enemy.y && // Bullet's bottom edge is above the enemy's top edge
+                            bullet.y < enemyBottomEdge // Bullet's top edge is below the enemy's bottom edge
+                        );
+                    });
                     return !hit; // Remove enemy if hit
                 })
             );
         };
+        
 
         const interval = setInterval(checkBulletCollision, 20);
         return () => clearInterval(interval);
