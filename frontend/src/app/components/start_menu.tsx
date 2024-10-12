@@ -11,7 +11,7 @@ const StartMenu: NextPage = () => {
 
     const startGame = () => {
         console.log("Starting the game...");
-        router.push('game');
+        router.push('/game');
     };
 
     const openSettings = () => {
