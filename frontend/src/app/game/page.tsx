@@ -6,14 +6,14 @@ import { colors } from "../color";
 
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity } from '../redux/gameSlice';
+import { movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity, setOnGround } from '../redux/gameSlice';
 
 const gravity = 0.5;
 const jumpHeight = -12;
 const moveSpeed = 5;
 const groundHeight = 20;
 const bulletSpeed = 8;
-const enemySpeed = 2; 
+const enemySpeed = 2;
 
 // Styled components
 const GameContainer = styled.div.attrs<{ x: number; y: number }>((props) => ({
@@ -103,7 +103,8 @@ const GamePage: React.FC = () => {
                 break;
             case "Space":
                 if (onGround) {
-                    dispatch(applyGravity(jumpHeight));
+                    dispatch(applyGravity(jumpHeight)); // Trigger jump
+                    dispatch(setOnGround(false)); // Player is no longer on the ground
                 }
                 break;
             case "KeyS":
@@ -114,21 +115,22 @@ const GamePage: React.FC = () => {
 
     useEffect(() => {
         const gravityInterval = setInterval(() => {
-            dispatch(applyGravity(gravity));
+            if (!onGround) {
+                dispatch(applyGravity(gravity)); // Apply gravity while in the air
+            }
         }, 20);
 
         return () => clearInterval(gravityInterval);
-    }, [dispatch]);
+    }, [dispatch, onGround]);
 
     // Move enemies
     useEffect(() => {
         const enemyInterval = setInterval(() => {
-          dispatch(moveEnemies(enemySpeed)); 
+            dispatch(moveEnemies(enemySpeed));
         }, 20);
-      
+
         return () => clearInterval(enemyInterval);
-      }, [dispatch]);
-      
+    }, [dispatch]);
 
     useEffect(() => {
         const bulletInterval = setInterval(() => {
@@ -145,10 +147,10 @@ const GamePage: React.FC = () => {
                     playerPosition.x + 50 > enemy.x &&
                     playerPosition.x < enemy.x + 40 &&
                     Math.abs(playerPosition.y - enemy.y) < 20
-                  ) {
+                ) {
                     console.log("Player hit!");
                     dispatch(setPlayerAlive(false));
-                  }
+                }
             });
         };
 
@@ -174,6 +176,7 @@ const GamePage: React.FC = () => {
                     {enemies && Array.isArray(enemies) && enemies.map((enemy, index) => (
                         <Enemy key={index} x={enemy.x} y={enemy.y} />
                     ))}
+
                 </>
             ) : (
                 <h1 style={{ color: "red" }}>Game Over</h1>
