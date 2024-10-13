@@ -9,11 +9,11 @@ import { RootState } from '../redux/store';
 import { movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity, setOnGround, removeBullet, removeEnemy } from '../redux/gameSlice';
 
 const gravity = 0.5;
-const jumpHeight = -12;
+const jumpHeight = 12;
 const moveSpeed = 5;
-const groundHeight = 20;
-const bulletSpeed = 8;
-const enemySpeed = 2;
+const groundHeight = 140;
+const bulletSpeed = 6;
+const enemySpeed = 1.2;
 
 // Styled components
 const GameContainer = styled.div.attrs<{ x: number; y: number }>((props) => ({

@@ -12,7 +12,7 @@ interface GameState {
 const initialState: GameState = {
     playerPosition: { x: 100, y: 100 },
     bullets: [],
-    enemies: [{ x: 400, y: 100 }, { x: 600, y: 100 }],
+    enemies: [{ x: 700, y: 100 }, { x: 900, y: 100 }],
     playerAlive: true,
     onGround: true, // Player starts on the ground
     gravity: 0.5,  // Gravity constant
@@ -82,14 +82,14 @@ function checkCollisions(state: GameState) {
 
     // Check if player collides with any enemy
     state.enemies.forEach((enemy, enemyIndex) => {
-        const enemyRight = enemy.x + 90;
+        const enemyRight = enemy.x + 5;
         const enemyLeft = enemy.x;
         const enemyTop = enemy.y;
 
         if (
             playerRight > enemyLeft &&
             playerLeft < enemyRight &&
-            playerBottom <= enemyTop + 90 &&
+            playerBottom <= enemyTop + 5 &&
             playerBottom >= enemyTop
         ) {
             state.playerAlive = false;
@@ -99,18 +99,18 @@ function checkCollisions(state: GameState) {
     // Check if bullets hit any enemy
     state.bullets.forEach((bullet, bulletIndex) => {
         state.enemies.forEach((enemy, enemyIndex) => {
-            const bulletRight = bullet.x + 50;
+            const bulletRight = bullet.x + 5;
             const bulletLeft = bullet.x;
             const bulletBottom = bullet.y;
 
-            const enemyRight = enemy.x + 90;
+            const enemyRight = enemy.x + 5;
             const enemyLeft = enemy.x;
             const enemyTop = enemy.y;
 
             if (
                 bulletRight > enemyLeft &&
                 bulletLeft < enemyRight &&
-                bulletBottom <= enemyTop + 90 &&
+                bulletBottom <= enemyTop + 5 &&
                 bulletBottom >= enemyTop
             ) {
                 state.enemies.splice(enemyIndex, 1);
