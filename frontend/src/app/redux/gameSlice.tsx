@@ -49,6 +49,17 @@ const gameSlice = createSlice({
         setOnGround(state, action: PayloadAction<boolean>) {
             state.onGround = action.payload;
         },
+        generateEnemies(state) {
+          console.log('spawning new enemies')
+            // Define how many enemies and where they will spawn
+            const newEnemies = [
+                { x: window.innerWidth + 100, y: 100 },
+                { x: window.innerWidth + 300, y: 100 },
+                { x: window.innerWidth + 500, y: 100 }
+            ];
+
+            state.enemies = newEnemies;
+        },
         updateBullets(state, action: PayloadAction<number>) {
             const bulletSpeed = action.payload;
             state.bullets = state.bullets.map(bullet => ({ ...bullet, x: bullet.x + bulletSpeed }));
@@ -120,5 +131,5 @@ function checkCollisions(state: GameState) {
     });
 }
 
-export const { movePlayer, applyGravity, setOnGround, updateBullets, moveEnemies, shootBullet, setPlayerAlive, removeEnemy, removeBullet } = gameSlice.actions;
+export const { movePlayer, applyGravity, setOnGround, updateBullets, moveEnemies, shootBullet, setPlayerAlive, removeEnemy, removeBullet, generateEnemies } = gameSlice.actions;
 export default gameSlice.reducer;

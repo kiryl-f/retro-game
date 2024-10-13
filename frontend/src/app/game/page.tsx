@@ -6,7 +6,7 @@ import { colors } from "../color";
 
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity, setOnGround, removeBullet, removeEnemy } from '../redux/gameSlice';
+import { movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity, setOnGround, generateEnemies } from '../redux/gameSlice';
 
 const gravity = 0.5;
 const jumpHeight = 12;
@@ -14,6 +14,7 @@ const moveSpeed = 5;
 const groundHeight = 140;
 const bulletSpeed = 6;
 const enemySpeed = 1.2;
+const enemyRespawnDelay = 2000; 
 
 // Styled components
 const GameContainer = styled.div.attrs<{ x: number; y: number }>((props) => ({
@@ -163,6 +164,21 @@ const GamePage: React.FC = () => {
 
         return () => clearInterval(bulletInterval);
     }, [dispatch]);
+
+    useEffect(() => {
+        console.log('enemies number ' + enemies.length)
+        if (enemies.length === 0) {
+            //console.log('no enemies left')
+            const respawnTimer = setTimeout(() => {
+                dispatch(generateEnemies());
+            }, enemyRespawnDelay);
+
+            dispatch(generateEnemies());
+
+            return () => clearTimeout(respawnTimer);  // Cleanup timer on unmount
+        }
+    }, [enemies, dispatch]);
+
 
 
     // Listen for keyboard input
