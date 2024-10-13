@@ -6,7 +6,7 @@ import { colors } from "../color";
 
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity, setOnGround } from '../redux/gameSlice';
+import { movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity, setOnGround, removeBullet, removeEnemy } from '../redux/gameSlice';
 
 const gravity = 0.5;
 const jumpHeight = -12;
@@ -112,7 +112,31 @@ const GamePage: React.FC = () => {
                 break;
         }
     };
-
+    useEffect(() => {
+        const gravityInterval = setInterval(() => {
+            dispatch(applyGravity(gravity));
+        }, 20);
+    
+        return () => clearInterval(gravityInterval);
+    }, [dispatch]);
+    
+    useEffect(() => {
+        const enemyInterval = setInterval(() => {
+            dispatch(moveEnemies(enemySpeed));
+        }, 20);
+    
+        return () => clearInterval(enemyInterval);
+    }, [dispatch]);
+    
+    useEffect(() => {
+        const bulletInterval = setInterval(() => {
+            dispatch(updateBullets(bulletSpeed));
+        }, 20);
+    
+        return () => clearInterval(bulletInterval);
+    }, [dispatch]);
+    
+      
     useEffect(() => {
         const gravityInterval = setInterval(() => {
             if (!onGround) {
@@ -140,23 +164,6 @@ const GamePage: React.FC = () => {
         return () => clearInterval(bulletInterval);
     }, [dispatch]);
 
-    useEffect(() => {
-        const checkPlayerCollision = () => {
-            enemies.forEach((enemy) => {
-                if (
-                    playerPosition.x + 50 > enemy.x &&
-                    playerPosition.x < enemy.x + 40 &&
-                    Math.abs(playerPosition.y - enemy.y) < 20
-                ) {
-                    console.log("Player hit!");
-                    dispatch(setPlayerAlive(false));
-                }
-            });
-        };
-
-        const collisionInterval = setInterval(checkPlayerCollision, 20);
-        return () => clearInterval(collisionInterval);
-    }, [dispatch, playerPosition, enemies]);
 
     // Listen for keyboard input
     useEffect(() => {
