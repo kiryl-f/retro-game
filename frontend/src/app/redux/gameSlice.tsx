@@ -5,6 +5,9 @@ interface GameState {
     bullets: Array<{ x: number, y: number }>;
     enemies: Array<{ x: number, y: number }>;
     playerAlive: boolean;
+    score: number;
+    deadEnemyCount: number;
+    bestScore: number;
     onGround: boolean; // Tracks whether the player is on the ground
     gravity: number;
 }
@@ -12,6 +15,9 @@ interface GameState {
 const initialState: GameState = {
     playerPosition: { x: 100, y: 100 },
     bullets: [],
+    score: 0,
+    bestScore: localStorage.getItem('bestScore') ? parseInt(localStorage.getItem('bestScore') as string) : 0,
+    deadEnemyCount: 0,
     enemies: [{ x: 700, y: 100 }, { x: 900, y: 100 }],
     playerAlive: true,
     onGround: true, // Player starts on the ground
@@ -82,16 +88,29 @@ const gameSlice = createSlice({
         removeBullet(state, action: PayloadAction<number>) {
             state.bullets.splice(action.payload, 1);
         },
+        incrementScore(state) {
+            state.score += 100; // Increment score by 100 for each enemy killed
+        },
+
+        resetScore(state) {
+            state.score = 0;
+        },
+
+        setBestScore(state) {
+            if (state.score > state.bestScore) {
+                state.bestScore = state.score;
+                localStorage.setItem('bestScore', state.bestScore.toString());
+            }
+        }
     }
 });
 
-// Collision detection logic integrated into Redux
+
 function checkCollisions(state: GameState) {
     const playerRight = state.playerPosition.x + 100;
     const playerLeft = state.playerPosition.x;
     const playerBottom = state.playerPosition.y;
 
-    // Check if player collides with any enemy
     state.enemies.forEach((enemy, enemyIndex) => {
         const enemyRight = enemy.x + 5;
         const enemyLeft = enemy.x;
@@ -124,12 +143,14 @@ function checkCollisions(state: GameState) {
                 bulletBottom <= enemyTop + 5 &&
                 bulletBottom >= enemyTop
             ) {
+                state.deadEnemyCount += 1;
                 state.enemies.splice(enemyIndex, 1);
                 state.bullets.splice(bulletIndex, 1);
+                state.score += 100;
             }
         });
     });
 }
 
-export const { movePlayer, applyGravity, setOnGround, updateBullets, moveEnemies, shootBullet, setPlayerAlive, removeEnemy, removeBullet, generateEnemies } = gameSlice.actions;
+export const { movePlayer, applyGravity, setOnGround, updateBullets, moveEnemies, shootBullet, setPlayerAlive, removeEnemy, removeBullet, generateEnemies, incrementScore, resetScore, setBestScore } = gameSlice.actions;
 export default gameSlice.reducer;
