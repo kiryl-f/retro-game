@@ -2,13 +2,20 @@ import React from "react";
 import styled from "styled-components";
 import { colors } from "../color";
 
+import localFont from "next/font/local";
+
+
+const myFont = localFont({src: '../fonts/IBMPlexMono-Bold.ttf'});
+
 const Button = styled.div`
+
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
 
     width: 30%;
     text-align: center;
     margin-top: 5.5vh;
 
-    font-family: 'IBM Plex Mono';
+    font-family: "IBM Plex Mono", monospace;
     font-weight: 700;
     font-size: 32px;   
     text-transform: uppercase;
@@ -35,6 +42,10 @@ const Button = styled.div`
     &:active {
         transform: translate(0.125rem, 0.125rem); /* Fixed the syntax here */
         box-shadow: 0.125rem 0.125rem #121212;
+    }
+
+    &:hover {
+        box-shadow: 0.15rem 0.15rem #ffffff;
     }
 `;
 
