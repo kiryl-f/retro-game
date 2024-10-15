@@ -5,14 +5,13 @@ import "./globals.css";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 
-import { IBM_Plex_Mono } from "next/font/google";
+import { Press_Start_2P } from "next/font/google";
 
-import { Caveat } from "next/font/google";
 
-const IBMPlexMonoBold = IBM_Plex_Mono({
+const PressStart2P = Press_Start_2P({
   // src: "./fonts/IBMPlexMono-Bold.ttf"
-  variable: "--font-ibm-plex-mono",
-  weight: ['700'],
+  variable: "--font-press-start",
+  weight: ['400'],
   subsets: ['latin']
 });
 
@@ -23,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${IBMPlexMonoBold.variable}`}>
+      <body className={`${PressStart2P.variable}`}>
         <Provider store={store}>
           {children}
         </Provider>
