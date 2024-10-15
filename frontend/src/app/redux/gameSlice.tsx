@@ -139,14 +139,11 @@ const gameSlice = createSlice({
     }
 });
 
-
-// Collision detection logic
 function checkCollisions(state: GameState) {
     const playerRight = state.playerPosition.x + 100;
     const playerLeft = state.playerPosition.x;
     const playerBottom = state.playerPosition.y;
 
-    // Check if player collides with any enemy
     state.enemies.forEach((enemy, enemyIndex) => {
         const enemyRight = enemy.x + 5;
         const enemyLeft = enemy.x;
@@ -165,7 +162,6 @@ function checkCollisions(state: GameState) {
         }
     });
 
-    // Check if bullets hit any enemy
     state.bullets.forEach((bullet, bulletIndex) => {
         state.enemies.forEach((enemy, enemyIndex) => {
             const bulletRight = bullet.x + 5;
