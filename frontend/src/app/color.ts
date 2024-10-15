@@ -4,4 +4,7 @@ export const colors = {
     secondaryButton: '#FFFF00', // Bright Yellow
     text: '#FFFFFF', // White
     accent: '#FF1493', // Magenta
+
+    gameBg: '#000000',
+    platform: '#ffffff'
 };

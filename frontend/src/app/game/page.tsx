@@ -26,7 +26,7 @@ const GameContainer = styled.div.attrs<{ x: number; y: number }>((props) => ({
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    background: linear-gradient(to bottom, #3a3a3a, #8a8a8a);
+    background: ${colors.gameBg};
 `;
 
 const Player = styled.div.attrs<{ x: number; y: number }>((props) => ({
@@ -81,7 +81,7 @@ const Platform = styled.div`
     left: 0;
     width: 100%;
     height: ${groundHeight}px;
-    background-color: ${colors.secondaryButton};
+    background-color: ${colors.platform};
     z-index: 0;
 `;
 
@@ -166,8 +166,8 @@ const GamePage: React.FC = () => {
                     <Player x={playerPosition.x} y={playerPosition.y} />
                     <Platform />
                     <div style={{ position: "absolute", top: 10, left: 10, color: "white" }}>
-                        <h2>Score: {score}</h2>
-                        <h3>Best Score: {bestScore}</h3>
+                        <h2 style={{marginBottom: '1.5vh'}}>Score: {score}</h2>
+                        <h3 style={{marginBottom: '1.5vh'}}>Best Score: {bestScore}</h3>
                         <h4>Health: {playerHealth}</h4>
                     </div>
                     {bullets && bullets.map((bullet, index) => (
@@ -179,7 +179,7 @@ const GamePage: React.FC = () => {
 
                 </>
             ) : (
-                <h1 style={{ color: "red" }}>Game Over</h1>
+                <h1 style={{ color: "red", height: '100%', width: '100%', textAlign: 'center', marginTop: '45vh'}}>Game Over</h1>
             )}
         </GameContainer>
     );
