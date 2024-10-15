@@ -6,7 +6,7 @@ import { colors } from "../color";
 
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity, setOnGround, generateEnemies, incrementScore, resetScore, setBestScore } from '../redux/gameSlice';
+import { movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity, setOnGround, generateEnemies, incrementScore, resetScore, setBestScore, decreasePlayerHealth, decrementEnemyHealth } from '../redux/gameSlice';
 
 const gravity = 0.5;
 const jumpHeight = 12;
@@ -16,7 +16,6 @@ const bulletSpeed = 6;
 const enemySpeed = 1.2;
 const enemyRespawnDelay = 2000;
 
-// Styled components
 const GameContainer = styled.div.attrs<{ x: number; y: number }>((props) => ({
     style: {
         bottom: `${props.y}px`,
@@ -86,11 +85,9 @@ const Platform = styled.div`
     z-index: 0;
 `;
 
-// Game Component
 const GamePage: React.FC = () => {
     const dispatch = useDispatch();
-    const { playerPosition, bullets, playerAlive, score, bestScore, onGround } = useSelector((state: RootState) => state.game);
-    const enemies = useSelector((state: RootState) => state.game.enemies);
+    const { playerPosition, bullets, playerAlive, score, bestScore, onGround, enemies, playerHealth } = useSelector((state: RootState) => state.game);
 
     const handleKeyDown = (e: KeyboardEvent) => {
         if (!playerAlive) return;
@@ -104,8 +101,8 @@ const GamePage: React.FC = () => {
                 break;
             case "Space":
                 if (onGround) {
-                    dispatch(applyGravity(jumpHeight)); // Trigger jump
-                    dispatch(setOnGround(false)); // Player is no longer on the ground
+                    dispatch(applyGravity(jumpHeight));
+                    dispatch(setOnGround(false)); 
                 }
                 break;
             case "KeyS":
@@ -113,6 +110,7 @@ const GamePage: React.FC = () => {
                 break;
         }
     };
+
     useEffect(() => {
         const gravityInterval = setInterval(() => {
             dispatch(applyGravity(gravity));
@@ -137,68 +135,25 @@ const GamePage: React.FC = () => {
         return () => clearInterval(bulletInterval);
     }, [dispatch]);
 
-
     useEffect(() => {
-        const gravityInterval = setInterval(() => {
-            if (!onGround) {
-                dispatch(applyGravity(gravity)); // Apply gravity while in the air
-            }
-        }, 20);
-
-        return () => clearInterval(gravityInterval);
-    }, [dispatch, onGround]);
-
-    // Move enemies
-    useEffect(() => {
-        const enemyInterval = setInterval(() => {
-            dispatch(moveEnemies(enemySpeed));
-        }, 20);
-
-        return () => clearInterval(enemyInterval);
-    }, [dispatch]);
-
-    useEffect(() => {
-        const bulletInterval = setInterval(() => {
-            dispatch(updateBullets(bulletSpeed));
-        }, 20);
-
-        return () => clearInterval(bulletInterval);
-    }, [dispatch]);
-
-    useEffect(() => {
-        console.log('enemies number ' + enemies.length)
+        console.log(enemies.length);
         if (enemies.length === 0) {
-            //console.log('no enemies left')
-            const respawnTimer = setTimeout(() => {
-                dispatch(generateEnemies());
-            }, enemyRespawnDelay);
-
             dispatch(generateEnemies());
-
-            return () => clearTimeout(respawnTimer);  // Cleanup timer on unmount
         }
     }, [enemies, dispatch]);
 
-
-
-    // Set best score when the player dies
     useEffect(() => {
         if (!playerAlive) {
             dispatch(setBestScore());
         }
     }, [playerAlive, dispatch]);
 
-    // Reset score when the game restarts
     useEffect(() => {
         if (playerAlive) {
             dispatch(resetScore());
         }
     }, [playerAlive, dispatch]);
 
-
-
-
-    // Listen for keyboard input
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
@@ -213,11 +168,12 @@ const GamePage: React.FC = () => {
                     <div style={{ position: "absolute", top: 10, left: 10, color: "white" }}>
                         <h2>Score: {score}</h2>
                         <h3>Best Score: {bestScore}</h3>
+                        <h4>Health: {playerHealth}</h4>
                     </div>
-                    {bullets && Array.isArray(bullets) && bullets.map((bullet, index) => (
+                    {bullets && bullets.map((bullet, index) => (
                         <Bullet key={index} x={bullet.x} y={bullet.y} />
                     ))}
-                    {enemies && Array.isArray(enemies) && enemies.map((enemy, index) => (
+                    {enemies && enemies.map((enemy, index) => (
                         <Enemy key={index} x={enemy.x} y={enemy.y} />
                     ))}
 

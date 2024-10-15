@@ -3,25 +3,30 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface GameState {
     playerPosition: { x: number, y: number };
     bullets: Array<{ x: number, y: number }>;
-    enemies: Array<{ x: number, y: number }>;
+    enemies: Array<{ x: number, y: number, hp: number }>; 
     playerAlive: boolean;
+    playerHealth: number; 
     score: number;
     deadEnemyCount: number;
     bestScore: number;
-    onGround: boolean; // Tracks whether the player is on the ground
+    onGround: boolean;
     gravity: number;
 }
 
 const initialState: GameState = {
     playerPosition: { x: 100, y: 100 },
     bullets: [],
+    enemies: [
+        { x: 700, y: 100, hp: 3 },
+        { x: 900, y: 100, hp: 5 }, 
+    ],
+    playerAlive: true,
+    playerHealth: 5, 
     score: 0,
     bestScore: localStorage.getItem('bestScore') ? parseInt(localStorage.getItem('bestScore') as string) : 0,
     deadEnemyCount: 0,
-    enemies: [{ x: 700, y: 100 }, { x: 900, y: 100 }],
-    playerAlive: true,
-    onGround: true, // Player starts on the ground
-    gravity: 0.5,  // Gravity constant
+    onGround: true,
+    gravity: 0.5,
 };
 
 const gameSlice = createSlice({
@@ -35,7 +40,7 @@ const gameSlice = createSlice({
             } else if (direction === "right") {
                 state.playerPosition.x += moveSpeed;
             }
-            // Ensure player stays within map bounds
+    
             if (state.playerPosition.x < 0) state.playerPosition.x = 0;
             if (state.playerPosition.x > window.innerWidth - 100) state.playerPosition.x = window.innerWidth - 100;
 
@@ -45,7 +50,7 @@ const gameSlice = createSlice({
             if (!state.onGround) {
                 state.playerPosition.y -= action.payload;
             }
-            // Prevent player from falling below the ground
+           
             if (state.playerPosition.y <= 0) {
                 state.playerPosition.y = 0;
                 state.onGround = true;
@@ -56,14 +61,14 @@ const gameSlice = createSlice({
             state.onGround = action.payload;
         },
         generateEnemies(state) {
-          console.log('spawning new enemies')
-            // Define how many enemies and where they will spawn
+            console.log('spawning new enemies');
+            
             const newEnemies = [
-                { x: window.innerWidth + 100, y: 100 },
-                { x: window.innerWidth + 300, y: 100 },
-                { x: window.innerWidth + 500, y: 100 }
+                { x: window.innerWidth + 100, y: 100, hp: 3 },  
+                { x: window.innerWidth + 300, y: 100, hp: 5 },
+                { x: window.innerWidth + 500, y: 100, hp: 2 }
             ];
-
+        
             state.enemies = newEnemies;
         },
         updateBullets(state, action: PayloadAction<number>) {
@@ -89,7 +94,7 @@ const gameSlice = createSlice({
             state.bullets.splice(action.payload, 1);
         },
         incrementScore(state) {
-            state.score += 100; // Increment score by 100 for each enemy killed
+            state.score += 100; 
         },
 
         resetScore(state) {
@@ -101,16 +106,47 @@ const gameSlice = createSlice({
                 state.bestScore = state.score;
                 localStorage.setItem('bestScore', state.bestScore.toString());
             }
-        }
+        },
+        decreasePlayerHealth(state) {
+            if (state.playerHealth > 0) {
+                state.playerHealth -= 1;
+            }
+            if (state.playerHealth === 0) {
+                state.playerAlive = false; 
+            }
+        },
+        decrementEnemyHealth(state, action: PayloadAction<number>) {
+            const enemyIndex = action.payload;
+            const enemy = state.enemies[enemyIndex];
+            if (enemy.hp > 0) {
+                enemy.hp -= 1;
+            }
+            if (enemy.hp === 0) {
+                state.enemies.splice(enemyIndex, 1);
+                state.deadEnemyCount += 1;
+                state.score += 100;
+            }
+        },
+        resetGame(state) {
+            state.playerHealth = 5;  
+            state.score = 0;
+            state.deadEnemyCount = 0;
+            state.enemies = [
+                { x: 700, y: 100, hp: 3 },
+                { x: 900, y: 100, hp: 5 },
+            ]; 
+        },
     }
 });
 
 
+// Collision detection logic
 function checkCollisions(state: GameState) {
     const playerRight = state.playerPosition.x + 100;
     const playerLeft = state.playerPosition.x;
     const playerBottom = state.playerPosition.y;
 
+    // Check if player collides with any enemy
     state.enemies.forEach((enemy, enemyIndex) => {
         const enemyRight = enemy.x + 5;
         const enemyLeft = enemy.x;
@@ -122,7 +158,10 @@ function checkCollisions(state: GameState) {
             playerBottom <= enemyTop + 5 &&
             playerBottom >= enemyTop
         ) {
-            state.playerAlive = false;
+            state.playerHealth -= 1;
+            if (state.playerHealth === 0) {
+                state.playerAlive = false; 
+            }
         }
     });
 
@@ -143,14 +182,19 @@ function checkCollisions(state: GameState) {
                 bulletBottom <= enemyTop + 5 &&
                 bulletBottom >= enemyTop
             ) {
-                state.deadEnemyCount += 1;
-                state.enemies.splice(enemyIndex, 1);
+                state.enemies[enemyIndex].hp -= 1;
+                if (state.enemies[enemyIndex].hp <= 0) {
+                    state.enemies.splice(enemyIndex, 1);
+                    state.score += 100;
+                }
+               
                 state.bullets.splice(bulletIndex, 1);
-                state.score += 100;
             }
         });
     });
 }
 
-export const { movePlayer, applyGravity, setOnGround, updateBullets, moveEnemies, shootBullet, setPlayerAlive, removeEnemy, removeBullet, generateEnemies, incrementScore, resetScore, setBestScore } = gameSlice.actions;
+export const { movePlayer, applyGravity, setOnGround, 
+    updateBullets, moveEnemies, shootBullet, setPlayerAlive, removeEnemy, removeBullet, generateEnemies, incrementScore, resetScore, setBestScore, 
+    decreasePlayerHealth, decrementEnemyHealth, resetGame } = gameSlice.actions;
 export default gameSlice.reducer;
