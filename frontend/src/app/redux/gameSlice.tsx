@@ -3,14 +3,16 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface GameState {
     playerPosition: { x: number, y: number };
     bullets: Array<{ x: number, y: number }>;
-    enemies: Array<{ x: number, y: number, hp: number }>; 
+    enemies: Array<{ x: number, y: number, hp: number }>;
+    enemyBullets: Array<{ x: number, y: number }>;
     playerAlive: boolean;
-    playerHealth: number; 
+    playerHealth: number;
     score: number;
     deadEnemyCount: number;
     bestScore: number;
     onGround: boolean;
     gravity: number;
+    inDefense: boolean;
 }
 
 const initialState: GameState = {
@@ -18,15 +20,17 @@ const initialState: GameState = {
     bullets: [],
     enemies: [
         { x: 700, y: 100, hp: 3 },
-        { x: 900, y: 100, hp: 5 }, 
+        { x: 900, y: 100, hp: 5 },
     ],
+    enemyBullets: [], 
     playerAlive: true,
-    playerHealth: 5, 
+    playerHealth: 5,
     score: 0,
     bestScore: localStorage.getItem('bestScore') ? parseInt(localStorage.getItem('bestScore') as string) : 0,
     deadEnemyCount: 0,
     onGround: true,
     gravity: 0.5,
+    inDefense: false,
 };
 
 const gameSlice = createSlice({
@@ -136,6 +140,49 @@ const gameSlice = createSlice({
                 { x: 900, y: 100, hp: 5 },
             ]; 
         },
+        checkEnemyPosition(state) {
+            state.enemies.forEach(enemy => {
+                if (enemy.x < 0) {
+                    state.playerAlive = false;
+                }
+            });
+        },
+        checkEnemyBulletCollisions(state) {
+            if (state.inDefense) return; 
+            const playerRight = state.playerPosition.x + 100;
+            const playerLeft = state.playerPosition.x;
+            const playerBottom = state.playerPosition.y;
+
+            state.enemyBullets.forEach((bullet, bulletIndex) => {
+                if (
+                    bullet.x < playerRight &&
+                    bullet.x > playerLeft &&
+                    bullet.y <= playerBottom + 100 &&
+                    bullet.y >= playerBottom
+                ) {
+                    console.log('enemy bullet hit player');
+                    state.playerHealth -= 1;
+                    state.enemyBullets.splice(bulletIndex, 1);
+                    if (state.playerHealth <= 0) {
+                        state.playerAlive = false;
+                    }
+                }
+            });
+        },
+        enemyShoot(state) {
+            state.enemies.forEach(enemy => {
+                state.enemyBullets.push({ x: enemy.x, y: enemy.y });
+            });
+        },
+
+        updateEnemyBullets(state, action: PayloadAction<number>) {
+            const bulletSpeed = action.payload;
+            state.enemyBullets = state.enemyBullets.map(bullet => ({ ...bullet, x: bullet.x - bulletSpeed }));
+        },
+  
+        setDefense(state, action: PayloadAction<boolean>) {
+            state.inDefense = action.payload;
+        },
     }
 });
 
@@ -192,5 +239,6 @@ function checkCollisions(state: GameState) {
 
 export const { movePlayer, applyGravity, setOnGround, 
     updateBullets, moveEnemies, shootBullet, setPlayerAlive, removeEnemy, removeBullet, generateEnemies, incrementScore, resetScore, setBestScore, 
-    decreasePlayerHealth, decrementEnemyHealth, resetGame } = gameSlice.actions;
+    decreasePlayerHealth, decrementEnemyHealth, resetGame,
+    updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition } = gameSlice.actions;
 export default gameSlice.reducer;

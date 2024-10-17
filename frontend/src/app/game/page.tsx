@@ -6,7 +6,11 @@ import { colors } from "../color";
 
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity, setOnGround, generateEnemies, incrementScore, resetScore, setBestScore, decreasePlayerHealth, decrementEnemyHealth } from '../redux/gameSlice';
+import {
+    movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity,
+    setOnGround, generateEnemies, incrementScore, resetScore, setBestScore, decreasePlayerHealth, decrementEnemyHealth,
+    updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition
+} from '../redux/gameSlice';
 
 const gravity = 0.5;
 const jumpHeight = 12;
@@ -59,6 +63,17 @@ const Enemy = styled.div.attrs<{ x: number; y: number }>((props) => ({
     z-index: 1;
 `;
 
+
+
+const EnemyBullet = styled.div<{ x: number, y: number }>`
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: orange;
+    left: ${props => props.x}px;
+    bottom: ${props => props.y}px;
+`;
+
 const Bullet = styled.div.attrs<{ x: number; y: number }>((props) => ({
     style: {
         left: `${props.x}px`,
@@ -87,7 +102,7 @@ const Platform = styled.div`
 
 const GamePage: React.FC = () => {
     const dispatch = useDispatch();
-    const { playerPosition, bullets, playerAlive, score, bestScore, onGround, enemies, playerHealth } = useSelector((state: RootState) => state.game);
+    const { playerPosition, bullets, playerAlive, score, bestScore, onGround, enemies, playerHealth, inDefense, enemyBullets } = useSelector((state: RootState) => state.game);
 
     const handleKeyDown = (e: KeyboardEvent) => {
         if (!playerAlive) return;
@@ -102,11 +117,14 @@ const GamePage: React.FC = () => {
             case "Space":
                 if (onGround) {
                     dispatch(applyGravity(jumpHeight));
-                    dispatch(setOnGround(false)); 
+                    dispatch(setOnGround(false));
                 }
                 break;
             case "KeyS":
                 dispatch(shootBullet(playerPosition));
+                break;
+            case "KeyD":
+                dispatch(setDefense(!inDefense));
                 break;
         }
     };
@@ -154,10 +172,36 @@ const GamePage: React.FC = () => {
         }
     }, [playerAlive, dispatch]);
 
+
+    useEffect(() => {
+        const enemyShootInterval = setInterval(() => {
+            dispatch(enemyShoot());
+        }, 2000);
+
+        return () => clearInterval(enemyShootInterval);
+    }, [dispatch]);
+
+    useEffect(() => {
+        const enemyBulletInterval = setInterval(() => {
+            dispatch(updateEnemyBullets(6));
+            dispatch(checkEnemyBulletCollisions());
+        }, 20);
+
+        return () => clearInterval(enemyBulletInterval);
+    }, [dispatch, inDefense]);
+
+    useEffect(() => {
+        const checkEnemyPositionInterval = setInterval(() => {
+            dispatch(checkEnemyPosition());
+        }, 50);  // Check if enemies go out of bounds
+
+        return () => clearInterval(checkEnemyPositionInterval);
+    }, [dispatch]);
+
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [onGround, playerAlive, playerPosition]);
+    }, [onGround, playerAlive, playerPosition, inDefense]);
 
     return (
         <GameContainer x={0} y={0}>
@@ -166,8 +210,8 @@ const GamePage: React.FC = () => {
                     <Player x={playerPosition.x} y={playerPosition.y} />
                     <Platform />
                     <div style={{ position: "absolute", top: 10, left: 10, color: "white" }}>
-                        <h2 style={{marginBottom: '1.5vh'}}>Score: {score}</h2>
-                        <h3 style={{marginBottom: '1.5vh'}}>Best Score: {bestScore}</h3>
+                        <h2 style={{ marginBottom: '1.5vh' }}>Score: {score}</h2>
+                        <h3 style={{ marginBottom: '1.5vh' }}>Best Score: {bestScore}</h3>
                         <h4>Health: {playerHealth}</h4>
                     </div>
                     {bullets && bullets.map((bullet, index) => (
@@ -177,9 +221,14 @@ const GamePage: React.FC = () => {
                         <Enemy key={index} x={enemy.x} y={enemy.y} />
                     ))}
 
+                    {enemyBullets.map((bullet, index) => (
+                        <EnemyBullet key={index} x={bullet.x} y={bullet.y} />
+                    ))}
+
+
                 </>
             ) : (
-                <h1 style={{ color: "red", height: '100%', width: '100%', textAlign: 'center', marginTop: '45vh'}}>Game Over</h1>
+                <h1 style={{ color: "red", height: '100%', width: '100%', textAlign: 'center', marginTop: '45vh' }}>Game Over</h1>
             )}
         </GameContainer>
     );
