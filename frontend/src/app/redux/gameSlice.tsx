@@ -1,10 +1,19 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+
+
+interface Bullet {
+    x: number;
+    y: number;
+    lifetime: number;
+}
+
+
 interface GameState {
     playerPosition: { x: number, y: number };
-    bullets: Array<{ x: number, y: number }>;
     enemies: Array<{ x: number, y: number, hp: number }>;
-    enemyBullets: Array<{ x: number, y: number }>;
+    bullets: Array<Bullet>;
+    enemyBullets: Array<Bullet>;
     playerAlive: boolean;
     playerHealth: number;
     score: number;
@@ -77,8 +86,9 @@ const gameSlice = createSlice({
         },
         updateBullets(state, action: PayloadAction<number>) {
             const bulletSpeed = action.payload;
-            state.bullets = state.bullets.map(bullet => ({ ...bullet, x: bullet.x + bulletSpeed }));
-            checkCollisions(state);
+            state.bullets = state.bullets
+                .map(bullet => ({ ...bullet, x: bullet.x + bulletSpeed, lifetime: bullet.lifetime - 1 }))
+                .filter(bullet => bullet.lifetime > 0);  // Only keep bullets that are still alive
         },
         moveEnemies(state, action: PayloadAction<number>) {
             const enemySpeed = action.payload;
@@ -86,7 +96,7 @@ const gameSlice = createSlice({
             checkCollisions(state);
         },
         shootBullet(state, action: PayloadAction<{ x: number, y: number }>) {
-            state.bullets.push({ ...action.payload });
+            state.bullets.push({ x: action.payload.x, y: action.payload.y, lifetime: 100 });  // Example: 100 frames
         },
         setPlayerAlive(state, action: PayloadAction<boolean>) {
             state.playerAlive = action.payload;
@@ -171,15 +181,16 @@ const gameSlice = createSlice({
         },
         enemyShoot(state) {
             state.enemies.forEach(enemy => {
-                state.enemyBullets.push({ x: enemy.x, y: enemy.y });
+                state.enemyBullets.push({ x: enemy.x, y: enemy.y, lifetime: 100 });
             });
         },
 
         updateEnemyBullets(state, action: PayloadAction<number>) {
             const bulletSpeed = action.payload;
-            state.enemyBullets = state.enemyBullets.map(bullet => ({ ...bullet, x: bullet.x - bulletSpeed }));
+            state.enemyBullets = state.enemyBullets
+                .map(bullet => ({ ...bullet, x: bullet.x - bulletSpeed, lifetime: bullet.lifetime - 1 }))
+                .filter(bullet => bullet.lifetime > 0);  // Remove enemy bullets with zero lifetime
         },
-  
         setDefense(state, action: PayloadAction<boolean>) {
             state.inDefense = action.payload;
         },
