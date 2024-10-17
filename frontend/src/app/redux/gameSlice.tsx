@@ -194,6 +194,20 @@ const gameSlice = createSlice({
         setDefense(state, action: PayloadAction<boolean>) {
             state.inDefense = action.payload;
         },
+
+
+        updateAllEntities(state, action: PayloadAction<{ bulletSpeed: number, enemySpeed: number }>) {
+            const { bulletSpeed, enemySpeed } = action.payload;
+            state.bullets = state.bullets
+                .map(bullet => ({ ...bullet, x: bullet.x + bulletSpeed, lifetime: bullet.lifetime - 1 }))
+                .filter(bullet => bullet.lifetime > 0);
+
+            state.enemyBullets = state.enemyBullets
+                .map(bullet => ({ ...bullet, x: bullet.x - bulletSpeed, lifetime: bullet.lifetime - 1 }))
+                .filter(bullet => bullet.lifetime > 0);
+
+            state.enemies = state.enemies.map(enemy => ({ ...enemy, x: enemy.x - enemySpeed }));
+        }
     }
 });
 
@@ -251,5 +265,5 @@ function checkCollisions(state: GameState) {
 export const { movePlayer, applyGravity, setOnGround, 
     updateBullets, moveEnemies, shootBullet, setPlayerAlive, removeEnemy, removeBullet, generateEnemies, incrementScore, resetScore, setBestScore, 
     decreasePlayerHealth, decrementEnemyHealth, resetGame,
-    updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition } = gameSlice.actions;
+    updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition, updateAllEntities } = gameSlice.actions;
 export default gameSlice.reducer;

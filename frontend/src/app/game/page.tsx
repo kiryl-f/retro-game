@@ -9,7 +9,8 @@ import { RootState } from '../redux/store';
 import {
     movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity,
     setOnGround, generateEnemies, incrementScore, resetScore, setBestScore, decreasePlayerHealth, decrementEnemyHealth,
-    updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition
+    updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition,
+    updateAllEntities
 } from '../redux/gameSlice';
 
 const gravity = 0.5;
@@ -137,21 +138,21 @@ const GamePage: React.FC = () => {
         return () => clearInterval(gravityInterval);
     }, [dispatch]);
 
-    useEffect(() => {
-        const enemyInterval = setInterval(() => {
-            dispatch(moveEnemies(enemySpeed));
-        }, 20);
+    // useEffect(() => {
+    //     const enemyInterval = setInterval(() => {
+    //         dispatch(moveEnemies(enemySpeed));
+    //     }, 20);
 
-        return () => clearInterval(enemyInterval);
-    }, [dispatch]);
+    //     return () => clearInterval(enemyInterval);
+    // }, [dispatch]);
 
-    useEffect(() => {
-        const bulletInterval = setInterval(() => {
-            dispatch(updateBullets(bulletSpeed));
-        }, 20);
+    // useEffect(() => {
+    //     const bulletInterval = setInterval(() => {
+    //         dispatch(updateBullets(bulletSpeed));
+    //     }, 20);
 
-        return () => clearInterval(bulletInterval);
-    }, [dispatch]);
+    //     return () => clearInterval(bulletInterval);
+    // }, [dispatch]);
 
     useEffect(() => {
         console.log(enemies.length);
@@ -173,6 +174,18 @@ const GamePage: React.FC = () => {
     }, [playerAlive, dispatch]);
 
 
+
+    useEffect(() => {
+        const gameUpdateInterval = setInterval(() => {
+            dispatch(updateAllEntities({ bulletSpeed: 11, enemySpeed: 2.5 }));
+            dispatch(checkEnemyBulletCollisions());
+        }, 60);
+    
+        return () => clearInterval(gameUpdateInterval);
+    }, [dispatch]);
+
+    
+
     useEffect(() => {
         const enemyShootInterval = setInterval(() => {
             dispatch(enemyShoot());
@@ -181,14 +194,14 @@ const GamePage: React.FC = () => {
         return () => clearInterval(enemyShootInterval);
     }, [dispatch]);
 
-    useEffect(() => {
-        const enemyBulletInterval = setInterval(() => {
-            dispatch(updateEnemyBullets(6));
-            dispatch(checkEnemyBulletCollisions());
-        }, 20);
+    // useEffect(() => {
+    //     const enemyBulletInterval = setInterval(() => {
+    //         dispatch(updateEnemyBullets(6));
+    //         dispatch(checkEnemyBulletCollisions());
+    //     }, 60);
 
-        return () => clearInterval(enemyBulletInterval);
-    }, [dispatch, inDefense]);
+    //     return () => clearInterval(enemyBulletInterval);
+    // }, [dispatch, inDefense]);
 
     useEffect(() => {
         const checkEnemyPositionInterval = setInterval(() => {
