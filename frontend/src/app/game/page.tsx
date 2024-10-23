@@ -179,7 +179,7 @@ const GamePage: React.FC = () => {
         const gameUpdateInterval = setInterval(() => {
             dispatch(updateAllEntities({ bulletSpeed: 11, enemySpeed: 2.5 }));
             dispatch(checkEnemyBulletCollisions());
-        }, 60);
+        }, 40);
     
         return () => clearInterval(gameUpdateInterval);
     }, [dispatch]);
@@ -194,19 +194,11 @@ const GamePage: React.FC = () => {
         return () => clearInterval(enemyShootInterval);
     }, [dispatch]);
 
-    // useEffect(() => {
-    //     const enemyBulletInterval = setInterval(() => {
-    //         dispatch(updateEnemyBullets(6));
-    //         dispatch(checkEnemyBulletCollisions());
-    //     }, 60);
-
-    //     return () => clearInterval(enemyBulletInterval);
-    // }, [dispatch, inDefense]);
 
     useEffect(() => {
         const checkEnemyPositionInterval = setInterval(() => {
             dispatch(checkEnemyPosition());
-        }, 50);  // Check if enemies go out of bounds
+        }, 50); 
 
         return () => clearInterval(checkEnemyPositionInterval);
     }, [dispatch]);
