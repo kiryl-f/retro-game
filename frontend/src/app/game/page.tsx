@@ -10,7 +10,7 @@ import {
     movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity,
     setOnGround, generateEnemies, incrementScore, resetScore, setBestScore, decreasePlayerHealth, decrementEnemyHealth,
     updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition,
-    updateAllEntities
+    updateAllEntities, addExplosion, updateExplosions
 } from '../redux/gameSlice';
 
 const gravity = 0.5;
@@ -64,6 +64,19 @@ const Enemy = styled.div.attrs<{ x: number; y: number }>((props) => ({
     z-index: 1;
 `;
 
+const Explosion = styled.div`
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, yellow, red, black);
+    border-radius: 50%;
+    position: absolute;
+    animation: fadeOut 0.3s ease-out forwards;
+
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+`;
 
 
 const EnemyBullet = styled.div<{ x: number, y: number }>`
@@ -103,7 +116,7 @@ const Platform = styled.div`
 
 const GamePage: React.FC = () => {
     const dispatch = useDispatch();
-    const { playerPosition, bullets, playerAlive, score, bestScore, onGround, enemies, playerHealth, inDefense, enemyBullets } = useSelector((state: RootState) => state.game);
+    const { playerPosition, bullets, playerAlive, score, bestScore, onGround, enemies, playerHealth, inDefense, enemyBullets, explosions } = useSelector((state: RootState) => state.game);
 
     const handleKeyDown = (e: KeyboardEvent) => {
         if (!playerAlive) return;
@@ -228,6 +241,10 @@ const GamePage: React.FC = () => {
 
                     {enemyBullets.map((bullet, index) => (
                         <EnemyBullet key={index} x={bullet.x} y={bullet.y} />
+                    ))}
+
+                    {explosions.map((explosion, index) => (
+                        <Explosion key={index} style={{ left: explosion.x, top: explosion.y }} />
                     ))}
 
 

@@ -8,6 +8,12 @@ interface Bullet {
     lifetime: number;
 }
 
+interface Explosion {
+    x: number;
+    y: number;
+    lifetime: number;
+}
+
 
 interface GameState {
     playerPosition: { x: number, y: number };
@@ -22,6 +28,7 @@ interface GameState {
     onGround: boolean;
     gravity: number;
     inDefense: boolean;
+    explosions: Array<Explosion>;
 }
 
 const initialState: GameState = {
@@ -31,7 +38,7 @@ const initialState: GameState = {
         { x: 700, y: 100, hp: 3 },
         { x: 900, y: 100, hp: 5 },
     ],
-    enemyBullets: [], 
+    enemyBullets: [],
     playerAlive: true,
     playerHealth: 5,
     score: 0,
@@ -40,6 +47,7 @@ const initialState: GameState = {
     onGround: true,
     gravity: 0.5,
     inDefense: false,
+    explosions: [],
 };
 
 const gameSlice = createSlice({
@@ -53,7 +61,7 @@ const gameSlice = createSlice({
             } else if (direction === "right") {
                 state.playerPosition.x += moveSpeed;
             }
-    
+
             if (state.playerPosition.x < 0) state.playerPosition.x = 0;
             if (state.playerPosition.x > window.innerWidth - 100) state.playerPosition.x = window.innerWidth - 100;
 
@@ -63,7 +71,7 @@ const gameSlice = createSlice({
             if (!state.onGround) {
                 state.playerPosition.y -= action.payload;
             }
-           
+
             if (state.playerPosition.y <= 0) {
                 state.playerPosition.y = 0;
                 state.onGround = true;
@@ -75,13 +83,13 @@ const gameSlice = createSlice({
         },
         generateEnemies(state) {
             console.log('spawning new enemies');
-            
+
             const newEnemies = [
-                { x: window.innerWidth + 100, y: 100, hp: 3 },  
+                { x: window.innerWidth + 100, y: 100, hp: 3 },
                 { x: window.innerWidth + 300, y: 100, hp: 5 },
                 { x: window.innerWidth + 500, y: 100, hp: 2 }
             ];
-        
+
             state.enemies = newEnemies;
         },
         updateBullets(state, action: PayloadAction<number>) {
@@ -108,7 +116,7 @@ const gameSlice = createSlice({
             state.bullets.splice(action.payload, 1);
         },
         incrementScore(state) {
-            state.score += 100; 
+            state.score += 100;
         },
 
         resetScore(state) {
@@ -126,7 +134,7 @@ const gameSlice = createSlice({
                 state.playerHealth -= 1;
             }
             if (state.playerHealth === 0) {
-                state.playerAlive = false; 
+                state.playerAlive = false;
             }
         },
         decrementEnemyHealth(state, action: PayloadAction<number>) {
@@ -142,13 +150,13 @@ const gameSlice = createSlice({
             }
         },
         resetGame(state) {
-            state.playerHealth = 5;  
+            state.playerHealth = 5;
             state.score = 0;
             state.deadEnemyCount = 0;
             state.enemies = [
                 { x: 700, y: 100, hp: 3 },
                 { x: 900, y: 100, hp: 5 },
-            ]; 
+            ];
         },
         checkEnemyPosition(state) {
             state.enemies.forEach(enemy => {
@@ -158,7 +166,7 @@ const gameSlice = createSlice({
             });
         },
         checkEnemyBulletCollisions(state) {
-            if (state.inDefense) return; 
+            if (state.inDefense) return;
             const playerRight = state.playerPosition.x + 100;
             const playerLeft = state.playerPosition.x;
             const playerBottom = state.playerPosition.y;
@@ -207,6 +215,18 @@ const gameSlice = createSlice({
                 .filter(bullet => bullet.lifetime > 0);
 
             state.enemies = state.enemies.map(enemy => ({ ...enemy, x: enemy.x - enemySpeed }));
+
+            state.explosions = state.explosions
+                .map(explosion => ({ ...explosion, lifetime: explosion.lifetime - 1 }))
+                .filter(explosion => explosion.lifetime > 0);
+        },
+        addExplosion(state, action: PayloadAction<{ x: number, y: number }>) {
+            state.explosions.push({ x: action.payload.x, y: action.payload.y, lifetime: 20 }); // Lifetime of 20 frames
+        },
+        updateExplosions(state) {
+            state.explosions = state.explosions
+                .map(explosion => ({ ...explosion, lifetime: explosion.lifetime - 1 }))
+                .filter(explosion => explosion.lifetime > 0); // Remove explosions that have reached zero lifetime
         }
     }
 });
@@ -221,6 +241,14 @@ function checkCollisions(state: GameState) {
         const enemyLeft = enemy.x;
         const enemyTop = enemy.y;
 
+        if (enemy.hp <= 0) {
+            // Trigger explosion at the enemy's position
+            state.explosions.push({ x: enemy.x, y: enemy.y, lifetime: 20 });
+            state.enemies.splice(enemyIndex, 1);
+            state.score += 100;
+        }
+
+
         if (
             playerRight > enemyLeft &&
             playerLeft < enemyRight &&
@@ -229,7 +257,7 @@ function checkCollisions(state: GameState) {
         ) {
             state.playerHealth -= 1;
             if (state.playerHealth === 0) {
-                state.playerAlive = false; 
+                state.playerAlive = false;
             }
         }
     });
@@ -250,20 +278,22 @@ function checkCollisions(state: GameState) {
                 bulletBottom <= enemyTop + 5 &&
                 bulletBottom >= enemyTop
             ) {
+                state.explosions.push({ x: enemy.x, y: enemy.y, lifetime: 20 });
+                
                 state.enemies[enemyIndex].hp -= 1;
                 if (state.enemies[enemyIndex].hp <= 0) {
                     state.enemies.splice(enemyIndex, 1);
                     state.score += 100;
                 }
-               
+
                 state.bullets.splice(bulletIndex, 1);
             }
         });
     });
 }
 
-export const { movePlayer, applyGravity, setOnGround, 
-    updateBullets, moveEnemies, shootBullet, setPlayerAlive, removeEnemy, removeBullet, generateEnemies, incrementScore, resetScore, setBestScore, 
+export const { movePlayer, applyGravity, setOnGround,
+    updateBullets, moveEnemies, shootBullet, setPlayerAlive, removeEnemy, removeBullet, generateEnemies, incrementScore, resetScore, setBestScore,
     decreasePlayerHealth, decrementEnemyHealth, resetGame,
-    updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition, updateAllEntities } = gameSlice.actions;
+    updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition, updateAllEntities, addExplosion, updateExplosions } = gameSlice.actions;
 export default gameSlice.reducer;
