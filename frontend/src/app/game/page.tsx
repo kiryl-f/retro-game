@@ -65,8 +65,8 @@ const Enemy = styled.div.attrs<{ x: number; y: number }>((props) => ({
 `;
 
 const Explosion = styled.div`
-    width: 20px;
-    height: 20px;
+    width: 40px;
+    height: 40px;
     background: radial-gradient(circle, yellow, red, black);
     border-radius: 50%;
     position: absolute;
@@ -244,7 +244,7 @@ const GamePage: React.FC = () => {
                     ))}
 
                     {explosions.map((explosion, index) => (
-                        <Explosion key={index} style={{ left: explosion.x, top: explosion.y }} />
+                        <Explosion key={index} style={{ left: explosion.x, bottom: explosion.y }} />
                     ))}
 
 

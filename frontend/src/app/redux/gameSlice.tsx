@@ -278,8 +278,8 @@ function checkCollisions(state: GameState) {
                 bulletBottom <= enemyTop + 5 &&
                 bulletBottom >= enemyTop
             ) {
-                state.explosions.push({ x: enemy.x, y: enemy.y, lifetime: 20 });
-                
+                state.explosions.push({ x: enemy.x, y: enemy.y, lifetime: 40 });
+
                 state.enemies[enemyIndex].hp -= 1;
                 if (state.enemies[enemyIndex].hp <= 0) {
                     state.enemies.splice(enemyIndex, 1);
