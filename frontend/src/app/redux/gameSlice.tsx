@@ -1,6 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 
+interface Achievement {
+    id: string;
+    name: string;
+    description: string;
+    unlocked: boolean;
+    date: Date | null; // Date is set when the achievement is unlocked
+}
+
+
 
 interface Bullet {
     x: number;
@@ -29,6 +38,7 @@ interface GameState {
     gravity: number;
     inDefense: boolean;
     explosions: Array<Explosion>;
+    achievements: Array<Achievement>
 }
 
 const initialState: GameState = {
@@ -48,6 +58,13 @@ const initialState: GameState = {
     gravity: 0.5,
     inDefense: false,
     explosions: [],
+
+    achievements: [
+        { id: 'first_kill', name: 'First Kill', description: 'Destroy your first enemy', unlocked: false, date: null },
+        { id: 'ten_kills', name: 'Sharpshooter', description: 'Destroy 10 enemies', unlocked: false, date: null },
+        { id: 'survivor', name: 'Survivor', description: 'Survive for 5 minutes', unlocked: false, date: null },
+        { id: 'high_score', name: 'High Score', description: 'Reach 1000 points', unlocked: false, date: null }
+    ],
 };
 
 const gameSlice = createSlice({
@@ -227,7 +244,15 @@ const gameSlice = createSlice({
             state.explosions = state.explosions
                 .map(explosion => ({ ...explosion, lifetime: explosion.lifetime - 1 }))
                 .filter(explosion => explosion.lifetime > 0); // Remove explosions that have reached zero lifetime
+        },
+        unlockAchievement(state, action: PayloadAction<string>) {
+            const achievement = state.achievements.find(a => a.id === action.payload);
+            if (achievement && !achievement.unlocked) {
+                achievement.unlocked = true;
+                achievement.date = new Date(); // Set the unlock date
+            }
         }
+        
     }
 });
 
