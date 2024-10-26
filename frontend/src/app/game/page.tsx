@@ -10,7 +10,9 @@ import {
     movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity,
     setOnGround, generateEnemies, incrementScore, resetScore, setBestScore, decreasePlayerHealth, decrementEnemyHealth,
     updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition,
-    updateAllEntities, addExplosion, updateExplosions
+    updateAllEntities, addExplosion, updateExplosions,
+    incrementTimer,
+    resetTimer
 } from '../redux/gameSlice';
 import { useRouter } from "next/navigation";
 
@@ -119,6 +121,8 @@ const GamePage: React.FC = () => {
     const dispatch = useDispatch();
     const { playerPosition, bullets, playerAlive, score, bestScore, onGround, enemies, playerHealth, inDefense, enemyBullets, explosions } = useSelector((state: RootState) => state.game);
 
+    const timer = useSelector((state: RootState) => state.game.timer);
+
     const handleKeyDown = (e: KeyboardEvent) => {
         if (!playerAlive) return;
 
@@ -222,6 +226,25 @@ const GamePage: React.FC = () => {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [onGround, playerAlive, playerPosition, inDefense]);
 
+
+    useEffect(() => {
+        if (playerAlive) {
+            dispatch(resetTimer());
+            const timerInterval = setInterval(() => {
+                dispatch(incrementTimer());
+            }, 1000);
+    
+            return () => clearInterval(timerInterval);
+        }
+    }, [playerAlive, dispatch]);
+
+    const formatTime = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    };
+
+    
     const router = useRouter();
     return (
         <GameContainer x={0} y={0}>
@@ -232,7 +255,8 @@ const GamePage: React.FC = () => {
                     <div style={{ position: "absolute", top: 10, left: 10, color: "white" }}>
                         <h2 style={{ marginBottom: '1.5vh' }}>Score: {score}</h2>
                         <h3 style={{ marginBottom: '1.5vh' }}>Best Score: {bestScore}</h3>
-                        <h4>Health: {playerHealth}</h4>
+                        <h4 style={{ marginBottom: '1.5vh' }}>Health: {playerHealth}</h4>
+                        <h4>Time: {formatTime(timer)}</h4>
                     </div>
                     {bullets && bullets.map((bullet, index) => (
                         <Bullet key={index} x={bullet.x} y={bullet.y} />

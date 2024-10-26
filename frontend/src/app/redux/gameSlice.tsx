@@ -39,6 +39,7 @@ interface GameState {
     inDefense: boolean;
     explosions: Array<Explosion>;
     achievements: Array<Achievement>
+    timer: number;
 }
 
 const initialState: GameState = {
@@ -65,6 +66,8 @@ const initialState: GameState = {
         { id: 'survivor', name: 'Survivor', description: 'Survive for 5 minutes', unlocked: false, date: null },
         { id: 'high_score', name: 'High Score', description: 'Reach 1000 points', unlocked: false, date: null }
     ],
+
+    timer: 0
 };
 
 const gameSlice = createSlice({
@@ -251,6 +254,12 @@ const gameSlice = createSlice({
                 achievement.unlocked = true;
                 achievement.date = new Date(); // Set the unlock date
             }
+        },
+        incrementTimer(state) {
+            state.timer += 1;
+        },
+        resetTimer(state) {
+            state.timer = 0;
         }
         
     }
@@ -320,5 +329,5 @@ function checkCollisions(state: GameState) {
 export const { movePlayer, applyGravity, setOnGround,
     updateBullets, moveEnemies, shootBullet, setPlayerAlive, removeEnemy, removeBullet, generateEnemies, incrementScore, resetScore, setBestScore,
     decreasePlayerHealth, decrementEnemyHealth, resetGame,
-    updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition, updateAllEntities, addExplosion, updateExplosions } = gameSlice.actions;
+    updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition, updateAllEntities, addExplosion, updateExplosions, incrementTimer, resetTimer } = gameSlice.actions;
 export default gameSlice.reducer;
