@@ -12,6 +12,7 @@ import {
     updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition,
     updateAllEntities, addExplosion, updateExplosions
 } from '../redux/gameSlice';
+import { useRouter } from "next/navigation";
 
 const gravity = 0.5;
 const jumpHeight = 12;
@@ -193,11 +194,11 @@ const GamePage: React.FC = () => {
             dispatch(updateAllEntities({ bulletSpeed: 11, enemySpeed: 2.5 }));
             dispatch(checkEnemyBulletCollisions());
         }, 40);
-    
+
         return () => clearInterval(gameUpdateInterval);
     }, [dispatch]);
 
-    
+
 
     useEffect(() => {
         const enemyShootInterval = setInterval(() => {
@@ -211,7 +212,7 @@ const GamePage: React.FC = () => {
     useEffect(() => {
         const checkEnemyPositionInterval = setInterval(() => {
             dispatch(checkEnemyPosition());
-        }, 50); 
+        }, 50);
 
         return () => clearInterval(checkEnemyPositionInterval);
     }, [dispatch]);
@@ -221,6 +222,7 @@ const GamePage: React.FC = () => {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [onGround, playerAlive, playerPosition, inDefense]);
 
+    const router = useRouter();
     return (
         <GameContainer x={0} y={0}>
             {playerAlive ? (
@@ -250,7 +252,13 @@ const GamePage: React.FC = () => {
 
                 </>
             ) : (
-                <h1 style={{ color: "red", height: '100%', width: '100%', textAlign: 'center', marginTop: '45vh' }}>Game Over</h1>
+                <div>
+                    <h1 style={{ color: "red", height: '100%', width: '100%', userSelect: 'none', textAlign: 'center', marginTop: '45vh' }}>Game Over</h1>
+
+                    <div>
+                        <p style={{width: '100%', marginTop: '7vh', fontSize:'20px', cursor: 'pointer', color: '#ffffff', textAlign: 'center'}} onClick={() => {location.reload()}}>Try again!</p>
+                    </div>
+                </div>
             )}
         </GameContainer>
     );
