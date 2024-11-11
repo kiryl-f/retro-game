@@ -7,22 +7,18 @@ import { colors } from "../color";
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import {
-    movePlayer, shootBullet, moveEnemies, setPlayerAlive, updateBullets, applyGravity,
-    setOnGround, generateEnemies, incrementScore, resetScore, setBestScore, decreasePlayerHealth, decrementEnemyHealth,
-    updateEnemyBullets, setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition,
-    updateAllEntities, addExplosion, updateExplosions,
+    movePlayer, shootBullet, applyGravity,
+    setOnGround, generateEnemies, resetScore, setBestScore, 
+    setDefense, enemyShoot, checkEnemyBulletCollisions, checkEnemyPosition,
+    updateAllEntities, 
     incrementTimer,
     resetTimer
 } from '../redux/gameSlice';
-import { useRouter } from "next/navigation";
 
 const gravity = 0.5;
 const jumpHeight = 12;
 const moveSpeed = 5;
 const groundHeight = 140;
-const bulletSpeed = 6;
-const enemySpeed = 1.2;
-const enemyRespawnDelay = 2000;
 
 const GameContainer = styled.div.attrs<{ x: number; y: number }>((props) => ({
     style: {
@@ -245,7 +241,6 @@ const GamePage: React.FC = () => {
     };
 
     
-    const router = useRouter();
     return (
         <GameContainer x={0} y={0}>
             {playerAlive ? (
