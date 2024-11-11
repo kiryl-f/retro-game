@@ -253,9 +253,9 @@ const GamePage: React.FC = () => {
                     <Player x={playerPosition.x} y={playerPosition.y} />
                     <Platform />
                     <div style={{ position: "absolute", top: 10, left: 10, color: "white" }}>
-                        <h2 style={{ marginBottom: '1.5vh' }}>Score: {score}</h2>
-                        <h3 style={{ marginBottom: '1.5vh' }}>Best Score: {bestScore}</h3>
-                        <h4 style={{ marginBottom: '1.5vh' }}>Health: {playerHealth}</h4>
+                        <h2 style={{ marginBottom: '1.4vh' }}>Score: {score}</h2>
+                        <h3 style={{ marginBottom: '1.4vh' }}>Best Score: {bestScore}</h3>
+                        <h4 style={{ marginBottom: '1.4vh' }}>Health: {playerHealth}</h4>
                         <h4>Time: {formatTime(timer)}</h4>
                     </div>
                     {bullets && bullets.map((bullet, index) => (
