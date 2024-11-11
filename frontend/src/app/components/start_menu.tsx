@@ -1,7 +1,7 @@
-"use client"; // Add this line at the very top of your file
+"use client";
 
 import React from "react";
-import MenuButton from "./menu_button"; // Adjust the path based on your file structure
+import MenuButton from "./menu_button";
 import { colors } from "../color";
 import { useRouter } from "next/navigation";
 import { NextPage } from "next";

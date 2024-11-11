@@ -20,11 +20,9 @@ const Enemy: React.FC<Props> = ({ playerPosition }) => {
   const [position, setPosition] = useState({ top: 0, left: Math.random() * window.innerWidth });
 
   const checkCollision = () => {
-    // Basic collision detection between player and enemy
     const playerWidth = 50;
     if (position.top > 450 && position.left >= playerPosition && position.left <= playerPosition + playerWidth) {
       alert("Collision!");
-      // Reset enemy position after collision
       setPosition({ top: 0, left: Math.random() * window.innerWidth });
     }
   };
@@ -32,9 +30,9 @@ const Enemy: React.FC<Props> = ({ playerPosition }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       setPosition((prev) => {
-        const newTop = prev.top + 5; // Enemy falls down 5px every interval
+        const newTop = prev.top + 5;
         if (newTop > window.innerHeight) {
-          return { top: 0, left: Math.random() * window.innerWidth }; // Reset to top after reaching bottom
+          return { top: 0, left: Math.random() * window.innerWidth };
         }
         return { ...prev, top: newTop };
       });

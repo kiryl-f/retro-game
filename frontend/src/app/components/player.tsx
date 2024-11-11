@@ -14,21 +14,20 @@ const PlayerStyled = styled.div`
 `;
 
 const Player: React.FC = () => {
-  const [position, setPosition] = useState(0); // Player's X-axis position
+  const [position, setPosition] = useState(0);
 
   // Handle keydown event for movement
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'ArrowLeft') {
-      setPosition((prev) => Math.max(prev - 10, 0)); // Move left but limit to 0
+      setPosition((prev) => Math.max(prev - 10, 0));
     } else if (e.key === 'ArrowRight') {
-      setPosition((prev) => Math.min(prev + 10, window.innerWidth - 50)); // Move right, limit to window width
+      setPosition((prev) => Math.min(prev + 10, window.innerWidth - 50));
     }
   };
 
   useEffect(() => {
-    // Add event listener for keydown
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown); // Cleanup event listener
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   return <PlayerStyled left={position} />;

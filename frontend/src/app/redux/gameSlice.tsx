@@ -6,7 +6,7 @@ interface Achievement {
     name: string;
     description: string;
     unlocked: boolean;
-    date: Date | null; // Date is set when the achievement is unlocked
+    date: Date | null;
 }
 
 
@@ -116,7 +116,7 @@ const gameSlice = createSlice({
             const bulletSpeed = action.payload;
             state.bullets = state.bullets
                 .map(bullet => ({ ...bullet, x: bullet.x + bulletSpeed, lifetime: bullet.lifetime - 1 }))
-                .filter(bullet => bullet.lifetime > 0);  // Only keep bullets that are still alive
+                .filter(bullet => bullet.lifetime > 0); 
         },
         moveEnemies(state, action: PayloadAction<number>) {
             const enemySpeed = action.payload;
@@ -124,7 +124,7 @@ const gameSlice = createSlice({
             checkCollisions(state);
         },
         shootBullet(state, action: PayloadAction<{ x: number, y: number }>) {
-            state.bullets.push({ x: action.payload.x, y: action.payload.y, lifetime: 100 });  // Example: 100 frames
+            state.bullets.push({ x: action.payload.x, y: action.payload.y, lifetime: 100 });
         },
         setPlayerAlive(state, action: PayloadAction<boolean>) {
             state.playerAlive = action.payload;
@@ -241,18 +241,18 @@ const gameSlice = createSlice({
                 .filter(explosion => explosion.lifetime > 0);
         },
         addExplosion(state, action: PayloadAction<{ x: number, y: number }>) {
-            state.explosions.push({ x: action.payload.x, y: action.payload.y, lifetime: 20 }); // Lifetime of 20 frames
+            state.explosions.push({ x: action.payload.x, y: action.payload.y, lifetime: 20 });
         },
         updateExplosions(state) {
             state.explosions = state.explosions
                 .map(explosion => ({ ...explosion, lifetime: explosion.lifetime - 1 }))
-                .filter(explosion => explosion.lifetime > 0); // Remove explosions that have reached zero lifetime
+                .filter(explosion => explosion.lifetime > 0);
         },
         unlockAchievement(state, action: PayloadAction<string>) {
             const achievement = state.achievements.find(a => a.id === action.payload);
             if (achievement && !achievement.unlocked) {
                 achievement.unlocked = true;
-                achievement.date = new Date(); // Set the unlock date
+                achievement.date = new Date();
             }
         },
         incrementTimer(state) {

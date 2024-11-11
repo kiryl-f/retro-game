@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';  // Assuming your store file is named store.ts
+import { RootState } from '../redux/store'; 
 
 const PlayerHealthBar: React.FC = () => {
     const playerHealth = useSelector((state: RootState) => state.game.playerHealth);
