@@ -3,7 +3,7 @@ A modern browser-based 2D game built with React, Redux, and styled-components, f
 🛠️ Technologies Used
 Frontend
 
-    React: Component-based architecture for building user interfaces.
+    Next.js: Component-based architecture for building user interfaces.
     Redux Toolkit: Efficient state management for handling game logic, including player actions, enemies, bullets, and achievements.
     TypeScript: Strongly typed development for better code reliability and maintainability.
     styled-components: Dynamic styling for React components, enabling a clean and maintainable design system.
